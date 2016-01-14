@@ -43,10 +43,10 @@ def KEY_loop(df_working, df_SQL, KEY, Distan, ESPAR_IDs):
         for all_working_rows in df_working[KEY]:
             if (all_SQL_rows == all_working_rows and math.isnan(df_working.iloc[b]['lat']) != True):
                 Distance=numpy.sqrt((df_SQL.iloc[a]['Y1']-df_working.iloc[b]['lat'])**2+(df_SQL.iloc[a]['X1']-df_working.iloc[b]['lng'])**2)
-                if math.isnan(df_working[Distan][b]):
+                if (math.isnan(df_working[Distan][b]) and df_SQL.iloc[a]['ESPAR_ID'] not in df_working[ESPAR_IDs]):
                     df_working.set_value(b, Distan, Distance)
                     df_working.set_value(b, ESPAR_IDs, df_SQL.iloc[a]['ESPAR_ID'])
-                elif df_working[Distan][b]>Distance:
+                elif (df_working[Distan][b]>Distance and df_SQL.iloc[a]['ESPAR_ID'] not in df_working[ESPAR_IDs]):
                     df_working.set_value(b, Distan, Distance)
                     df_working.set_value(b, ESPAR_IDs, df_SQL.iloc[a]['ESPAR_ID'])
             b=b+1
