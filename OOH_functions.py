@@ -55,7 +55,7 @@ def KEY_loop(df_working, df_SQL, KEY, Distan, ESPAR_IDs):
     return df_working
 
 
-#searching for address in google and retrieve coordinates
+#searching for address in google and yandex and retrieve coordinates
 def Google_search(df_working):
     from selenium import webdriver
     from selenium.webdriver.common.by import By
@@ -71,24 +71,33 @@ def Google_search(df_working):
         url = 'http://maps.google.com/maps/api/geocode/json?address='
         word=str(i)
         print(word)
-        if '/' in word:
+        if (('МКАД' in word) or ('км' in word) or ('километр' in word) or ('/' in word)): #YANDEX
+            service_args = ['--proxy=mskwebp01101:8080','--proxy-auth=Artem.Korolev@mecglobal.com:WertelS3boge1',]
+            driver = webdriver.PhantomJS('C:/Python34/phantomjs-2.0.0-windows/bin/phantomjs.exe', service_args=service_args)
+            #driver.set_window_size(1120, 550)
+            driver.get('https://maps.yandex.ru/')
+            #driver.save_screenshot('out.png')
+            search = driver.find_element_by_xpath(("/html/body/div[1]/header/div[1]/div/form/div[1]/div/span/span/input"))
+            button = driver.find_element_by_xpath(("/html/body/div[1]/header/div[1]/div/form/div[2]/button"))
             print('TRUE')
             print(word)
-            driver = webdriver.Firefox()
-            driver.get('https://maps.yandex.ru/213/moscow/')
-            search = driver.find_element_by_xpath(("/html/body/div[1]/header/div[1]/div/form/div[1]/div/span/span/input"))
-            search.send_keys("Россия, Москва, проспект Мира / староалексеевская улица")
-            button = driver.find_element_by_xpath(("/html/body/div[1]/header/div[1]/div/form/div[2]/button"))
-            sleep(2)
+            search.send_keys(word)
+            sleep(4)
             button.submit()
-            sleep(2)
-            lan=driver.find_element_by_xpath("/html/body/div[1]/div[2]/div/div[1]/div/div[2]/div[1]/div/div[1]/div[1]/div[2]").text
-            lng=driver.find_element_by_xpath("/html/body/div[1]/div[2]/div/div[1]/div/div[2]/div[1]/div/div[1]/div[2]/div[2]").text
-            lat = re.search('([0-9]{1,}[,.][0-9]{1,})', lan)
-            lat=lat.group(0)
-            lng = re.search('([0-9]{1,}[,.][0-9]{1,})', lng)
-            lng=lng.group(0)
-        else:
+            sleep(4)
+            try:
+                element = WebDriverWait(driver, 10).until(
+                EC.presence_of_element_located((By.XPATH, "/html/body/div[1]/div[2]/div/div[1]/div/div[2]/div[1]/div/div[1]/div[1]/div[2]"))
+                )
+            finally:
+                lan=driver.find_element_by_xpath("/html/body/div[1]/div[2]/div/div[1]/div/div[2]/div[1]/div/div[1]/div[1]/div[2]").text
+                lng=driver.find_element_by_xpath("/html/body/div[1]/div[2]/div/div[1]/div/div[2]/div[1]/div/div[1]/div[2]/div[2]").text
+                lat = re.search('([0-9]{1,}[,.][0-9]{1,})', lan)
+                lat=lat.group(0)
+                lng = re.search('([0-9]{1,}[,.][0-9]{1,})', lng)
+                lng=lng.group(0)
+                driver.close()
+        else: #GOOGLE
             full_url = url+word
             print(full_url)
             if full_url != 'http://maps.google.com/maps/api/geocode/json?address=nan':
